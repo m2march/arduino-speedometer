@@ -12,6 +12,7 @@ class CircularBuffer {
         /** Pre: idx < this.capacity */
         const T& get(int idx) const;
 
+        const T& last() const;
 
     private:
         T* _elems;  
@@ -44,6 +45,12 @@ template<class T>
 const T& CircularBuffer<T>::get(int idx) const {
     int pos = (idx + this->_offset) % this->_capacity;
     return this->_elems[idx];
+}
+
+template<class T>
+const T& CircularBuffer<T>::last() const {
+    int pos = (this->_offset + this->_size) % this->_capacity;
+    return this->_elems[pos];
 }
 
 template<class T>
