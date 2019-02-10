@@ -1,5 +1,6 @@
 #include "CircularBuffer.h"
 #include <limits.h>
+#include "LowPower.h"
 
 #define REED_PIN 2
 #define INTERRUPT_DELTAS_SIZE 100
@@ -24,6 +25,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(REED_PIN), reed_interrupt, LOW);
   //Serial.println(min_reed_interval);
   //Serial.println("");
+  Serial.println("Start");
 }
 
 void reed_interrupt() {
@@ -34,6 +36,9 @@ void reed_interrupt() {
     }
     interrupt_deltas.push(delta);
     last_interrupt_micro = mus;
+  
+    float speed = delta_to_speed(interrupt_deltas.last());
+    Serial.println(speed);
 }
 
 float delta_to_speed(unsigned long delta) {
@@ -41,9 +46,12 @@ float delta_to_speed(unsigned long delta) {
 }
 
 void loop() {
+  Serial.println("Before sleep");
+  //LowPower.powerDown(SLEEP_1S, ADC_ON, BOD_ON);
+  LowPower.idle(SLEEP_500MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_OFF,
+                SPI_OFF, USART0_OFF, TWI_OFF);
   delay(1000);
   float speed = delta_to_speed(interrupt_deltas.last());
-  //Serial.println(interrupt_deltas.last());
   Serial.println(speed);
 }
 
