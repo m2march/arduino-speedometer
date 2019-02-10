@@ -11,7 +11,7 @@
 // V [cm/mus] = C [cm] / I [mus]
 // V [km/h] = (C [cm] / 100 / 1000) / (I [mus] / 1000 / 1000 / 60 / 60)
 // V [km/h] = C [cm] 36000 / I [mus]
-#define min_reed_interval wheel_diameter_cm * 36000L / MAX_SPEED
+#define min_reed_interval wheel_diameter_cm * PI * 36000L / MAX_SPEED
 #define delta_over ULONG_MAX - 10000L
 
 
@@ -22,22 +22,28 @@ void setup() {
   Serial.begin(9200);
   pinMode(REED_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(REED_PIN), reed_interrupt, LOW);
-  Serial.println(min_reed_interval);
-  Serial.println("");
+  //Serial.println(min_reed_interval);
+  //Serial.println("");
 }
 
 void reed_interrupt() {
     unsigned long mus = micros();
     unsigned long delta = mus - last_interrupt_micro;
-    if (delta > delta_over) {
+    if (delta > delta_over or delta < min_reed_interval) {
         return;
     }
-    Serial.print(delta);
-    Serial.print("\t");
-    Serial.println(min_reed_interval);
+    interrupt_deltas.push(delta);
     last_interrupt_micro = mus;
 }
 
-void loop() {
-  delay(100);
+float delta_to_speed(unsigned long delta) {
+    return (wheel_diameter_cm * PI * 36000L) / delta;
 }
+
+void loop() {
+  delay(1000);
+  float speed = delta_to_speed(interrupt_deltas.last());
+  //Serial.println(interrupt_deltas.last());
+  Serial.println(speed);
+}
+

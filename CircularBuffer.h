@@ -49,7 +49,7 @@ const T& CircularBuffer<T>::get(int idx) const {
 
 template<class T>
 const T& CircularBuffer<T>::last() const {
-    int pos = (this->_offset + this->_size) % this->_capacity;
+    int pos = (this->_offset + this->_size - 1) % this->_capacity;
     return this->_elems[pos];
 }
 
